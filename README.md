@@ -34,10 +34,10 @@ curl -fsSL https://github.com/ryansonshine/typescript-npm-package-template/archi
 Replace `FULL_NAME`, `GITHUB_USER`, and `REPO_NAME` in the script below with your own details to personalize your new package:
 
 ```bash
-FULL_NAME="John Smith"
-GITHUB_USER="johnsmith"
-REPO_NAME="my-cool-package"
-sed -i.mybak "s/\([\/\"]\)(ryansonshine)/$GITHUB_USER/g; s/typescript-npm-package-template\|my-package-name/$REPO_NAME/g; s/Ryan Sonshine/$FULL_NAME/g" package.json package-lock.json README.md
+FULL_NAME="Alexey Novichkov"
+GITHUB_USER="anovi"
+REPO_NAME="effector-state-machine"
+sed -i.mybak "s/\([\/\"]\)(ryansonshine)/$GITHUB_USER/g; s/typescript-npm-package-template\|my-package-name/$REPO_NAME/g; s/Alexey Novichkov/$FULL_NAME/g" package.json package-lock.json README.md
 rm *.mybak
 ```
 
