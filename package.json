@@ -15,6 +15,7 @@
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",
     "test": "jest --coverage",
+    "test-brk": "--inspect-brk jest --runInBand --colors",
     "typecheck": "tsc --noEmit"
   },
   "repository": {

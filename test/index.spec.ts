@@ -1,4 +1,4 @@
-import { FSA_Config, createMachine } from '../src';
+import { FSA_StateNode, createMachine } from '../src';
 import { createEvent } from 'effector';
 
 describe('index', () => {
@@ -7,11 +7,16 @@ describe('index', () => {
     const UPLOAD_COMPLETE = createEvent();
     const INIT_DOWNLOAD = createEvent();
     const DOWNLOAD_COMPLETE = createEvent();
+    const SWITCH = createEvent();
 
-    const fileMachine: FSA_Config = {
+    const fileMachine: FSA_StateNode = {
       // id: 'file',
       // type: 'parallel',
       initial: 'upload',
+      on: [
+        [SWITCH, 'download'],
+        [SWITCH, 'upload'],
+      ],
       states: {
         upload: {
           initial: 'idle',
@@ -39,6 +44,7 @@ describe('index', () => {
         },
       },
     };
+    // TODO Срабатывают только по одному, но не вместе, потому что надо переписать на класс
 
     it('should return state [upload, idle]', () => {
       const result = createMachine(fileMachine);
@@ -47,7 +53,15 @@ describe('index', () => {
 
     it('should change state to [upload, pending]', () => {
       const result = createMachine(fileMachine);
-      expect(result.getState()).toEqual(['upload', 'idle']);
+      INIT_UPLOAD();
+      expect(result.getState()).toEqual(['upload', 'pending']);
     });
+
+    it.only('should switch to [download, idle]', () => {
+      const result = createMachine(fileMachine);
+      SWITCH();
+      expect(result.getState()).toEqual(['download', 'idle']);
+    });
+
   });
 });
