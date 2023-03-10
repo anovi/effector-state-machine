@@ -44,7 +44,6 @@ describe('index', () => {
         },
       },
     };
-    // TODO Срабатывают только по одному, но не вместе, потому что надо переписать на класс
 
     it('should return state [upload, idle]', () => {
       const result = createMachine(fileMachine);
@@ -57,7 +56,7 @@ describe('index', () => {
       expect(result.getState()).toEqual(['upload', 'pending']);
     });
 
-    it.only('should switch to [download, idle]', () => {
+    it('should switch to [download, idle]', () => {
       const result = createMachine(fileMachine);
       SWITCH();
       expect(result.getState()).toEqual(['download', 'idle']);
