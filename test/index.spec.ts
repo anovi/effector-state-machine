@@ -1,4 +1,4 @@
-import { FSA_StateNode, createMachine } from '../src';
+import { SMC_StateNode, createMachine } from '../src';
 import { createEvent } from 'effector';
 
 describe('index', () => {
@@ -9,7 +9,7 @@ describe('index', () => {
     const DOWNLOAD_COMPLETE = createEvent();
     const SWITCH = createEvent();
 
-    const fileMachine: FSA_StateNode = {
+    const fileMachine: SMC_StateNode = {
       // id: 'file',
       // type: 'parallel',
       initial: 'upload',
