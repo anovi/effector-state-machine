@@ -17,16 +17,10 @@ describe('index', () => {
           initial: 'idle',
           states: {
             idle: {
-              on: {
-                event: INIT_UPLOAD,
-                target: 'pending',
-              },
+              on: [[INIT_UPLOAD, 'pending']],
             },
             pending: {
-              on: {
-                event: UPLOAD_COMPLETE,
-                target: 'success',
-              },
+              on: [[UPLOAD_COMPLETE, 'success']],
             },
             success: {},
           },
@@ -35,16 +29,10 @@ describe('index', () => {
           initial: 'idle',
           states: {
             idle: {
-              on: {
-                event: INIT_DOWNLOAD,
-                target: 'pending',
-              },
+              on: [[INIT_DOWNLOAD, 'pending']],
             },
             pending: {
-              on: {
-                event: DOWNLOAD_COMPLETE,
-                target: 'success',
-              },
+              on: [[DOWNLOAD_COMPLETE, 'success']],
             },
             success: {},
           },
