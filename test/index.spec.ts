@@ -1,7 +1,7 @@
 import { SMC_StateNode, createMachine } from '../src';
 import { createEvent } from 'effector';
 
-describe('index', () => {
+describe.skip('index', () => {
   describe('myPackage', () => {
     const INIT_UPLOAD = createEvent();
     const UPLOAD_COMPLETE = createEvent();

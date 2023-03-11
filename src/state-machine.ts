@@ -1,11 +1,13 @@
 /* eslint-disable prettier/prettier */
 import { createStore, Event, Store } from 'effector';
 import { reduce, forEach } from 'lodash';
+import { StateValue, StateValueNode, flattenState, StateValueBuilder } from './state';
+import { buildPossibleStates } from './possible-states';
 import {
     SMC_StateNode,
     SMC_States,
-    StateValue,
-    TransitionProps
+    TransitionProps,
+    StateAdress,
 } from './config'
 
 
@@ -16,9 +18,9 @@ function equalState(state1: StateValue, state2: StateValue): boolean {
   return state1.join('.') === state2.join('.');
 }
 
-function isTransitionAllowed(config: SMC_StateNode, to: StateValue): boolean {
+function isTransitionTargetAllowed(config: SMC_StateNode, to: string[]): boolean {
   if (!('states' in config)) return false;
-  function walk(states: SMC_States, parents: string[], to: StateValue): boolean {
+  function walk(states: SMC_States, parents: string[], to: string[]): boolean {
     const target = to[0];
     const rest = to.slice(1);
     const state = states[target];
@@ -34,6 +36,12 @@ function isTransitionAllowed(config: SMC_StateNode, to: StateValue): boolean {
   return walk(config.states, [], to);
 }
 
+function isTransitionFromAllowed(from: StateAdress, current: StateValue): boolean {
+  const possible = flattenState(current);
+  return possible.includes(from.join('.'));
+}
+
+
 /**
  * Class StateMachine
  */
@@ -45,12 +53,15 @@ export default class StateMachine {
 
   config: SMC_StateNode;
 
+  possible: string[][];
+
   private initial: StateValue;
 
 
   constructor(config: SMC_StateNode) {
     this.transitions = new Map();
     this.config = config;
+    this.possible = buildPossibleStates(config);
     this.initial = this.buildInitialState(config);
     this.store = this.buildStore(this.initial);
     this.createTransitions(config);
@@ -58,6 +69,35 @@ export default class StateMachine {
 
 
   private buildInitialState(data: SMC_StateNode): StateValue {
+    function readStates(states: SMC_States, parent?: string): StateValue {
+      const result: StateValue = [];
+      return reduce(states, (memo, curr, stateName) => {
+        if ('initial' in curr && stateName === parent) {
+          const node: StateValueNode = {
+            state: stateName,
+            child: readConfigInitial(curr),
+          };
+          memo.push(node);
+        }
+        return memo;
+      }, result);
+    }
+    function readConfigInitial(config: SMC_StateNode): StateValue {
+      if (!('initial' in config)) throw Error('No initial state in StateNode').stack = config.toString();
+      const children = config.states;
+      const node: StateValueNode = {
+        state: config.initial,
+        child: readStates(children, config.initial),
+      };
+      return [
+        node
+      ];
+    }
+    return readConfigInitial(data);
+  }
+
+
+  private buildInitialStateAdress(data: SMC_StateNode): string[] {
     function readStates(states: SMC_States, parent?: string): string[] {
       const result: string[] = [];
       return reduce(states, (memo, curr, stateName) => {
@@ -85,13 +125,14 @@ export default class StateMachine {
   private createTransition(props: TransitionProps): void {
     const config = this.config;
     // make a reducer
-    const reducer = function(state: StateValue) {
+    const reducer = function(state: StateValue): StateValue {
       // check if transition from is possible
       // debugger;
-      if (equalState(props.from, state)) {
+      if (isTransitionFromAllowed(props.from, state)) {
         // check if target state is possible
-        if (isTransitionAllowed(config, props.to)) {
+        if (isTransitionTargetAllowed(config, props.to)) {
           console.log('TRANSITION:', props.from, '===>', props.to);
+          // TODO make a transition
           return props.to;
         }
       }
@@ -127,7 +168,6 @@ export default class StateMachine {
   private createTransitions(config: SMC_StateNode): void {
   
     const readStates = (states: SMC_States, parents: string[] = []) => {
-      // const result: string[] = [];
       forEach(states, (curr, stateName) => {
         if ('states' in curr) {
           readConfigInitial(curr, [...parents, stateName]);
@@ -162,8 +202,8 @@ export default class StateMachine {
           this.createTransition({
             store: this.store,
             event,
-            from: [initial, ...this.buildInitialState(states[initial])],
-            to: [target, ...this.buildInitialState(states[target])],
+            from: [initial, ...this.buildInitialStateAdress(states[initial])],
+            to: [target, ...this.buildInitialStateAdress(states[target])],
             states,
             parents: [],
           });
